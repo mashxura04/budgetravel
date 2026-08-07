@@ -7,9 +7,9 @@ import App from "./App";
 import { AuthProvider } from "./context/AuthContext";
 import { LanguageProvider } from "./context/LanguageContext";
 
-const root = ReactDOM.createRoot(document.getElementById("root"));
+const rootElement = document.getElementById("root");
 
-root.render(
+const app = (
   <React.StrictMode>
     <HelmetProvider>
       <BrowserRouter>
@@ -22,3 +22,10 @@ root.render(
     </HelmetProvider>
   </React.StrictMode>
 );
+
+if (rootElement.hasChildNodes()) {
+  ReactDOM.hydrateRoot(rootElement, app);
+} else {
+  const root = ReactDOM.createRoot(rootElement);
+  root.render(app);
+}

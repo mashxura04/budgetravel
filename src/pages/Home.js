@@ -41,7 +41,7 @@ function Section({ title, subtitle, items, seeAllPath }) {
             reviewCount={item.review_count}
             price={item.price}
             priceLabel={item.price_label}
-            onClick={() => navigate(seeAllPath)}
+            to={seeAllPath}
           />
         ))}
       </div>

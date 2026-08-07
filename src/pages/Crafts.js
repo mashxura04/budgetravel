@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import SearchBar from "../components/SearchBar";
 import CategoryTabs from "../components/CategoryTabs";
@@ -9,7 +9,6 @@ import { supabase } from "../supabaseClient";
 import { localizeListing } from "../utils/localize";
 
 function Crafts() {
-  const navigate = useNavigate();
   const { t, lang } = useLanguage();
   const [searchParams] = useSearchParams();
   const [query, setQuery] = useState(searchParams.get("q") || "");
@@ -89,7 +88,7 @@ function Crafts() {
               reviewCount={craft.review_count}
               price={craft.price}
               priceLabel={craft.price_label}
-              onClick={() => navigate(`/crafts/${craft.id}`)}
+              to={`/crafts/${craft.id}`}
             />
           ))}
         </div>
