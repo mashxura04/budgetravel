@@ -47,7 +47,7 @@
   "reactSnap": {
     "source": "build",
     "destination": "build",
-    "skipThirdPartyRequests": false,
-    "waitFor": 2000
+    "skipThirdPartyRequests": true,
+    "waitFor": 1000
   }
 }
