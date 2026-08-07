@@ -44,10 +44,11 @@
       "last 1 safari version"
     ]
   },
-  "reactSnap": {
-    "source": "build",
-    "destination": "build",
-    "skipThirdPartyRequests": true,
-    "waitFor": 1000
-  }
+ "reactSnap": {
+  "source": "build",
+  "destination": "build",
+  "skipThirdPartyRequests": true,
+  "waitFor": 1000,
+  "puppeteerArgs": ["--no-sandbox", "--disable-setuid-sandbox"]
+}
 }
