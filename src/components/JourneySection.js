@@ -101,7 +101,7 @@ function JourneySection() {
   const pathD = "M 5 50 Q 27 12 50 50 T 95 50";
 
   return (
-    <section className="bg-gradient-to-b from-white via-[#FFFBF7] to-[#FFF6EC] py-16">
+    <section className="bg-[#FFFBF7] py-16">
       <div className="max-w-5xl mx-auto px-6">
         <div className="text-center mb-14">
           <p className="text-brand-600 font-bold text-xs tracking-[0.15em] uppercase mb-3">
