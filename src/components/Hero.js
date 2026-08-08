@@ -6,22 +6,22 @@ function Hero({ homesCount = 0, craftsCount = 0, cafesCount = 0 }) {
   const { t } = useLanguage();
 
   return (
-    <section className="relative bg-white pt-24 pb-28 px-6 overflow-hidden">
+    <section className="relative bg-[#FFFBF7] pt-24 pb-28 px-6 overflow-hidden">
       <div
-        className="absolute inset-0 dot-grid opacity-40"
+        className="absolute inset-0 dot-grid opacity-60"
         style={{ maskImage: "radial-gradient(ellipse 70% 60% at 50% 30%, black 30%, transparent 90%)" }}
       />
       <div
         className="absolute -top-16 -left-10 w-72 h-72 rounded-full pointer-events-none"
         style={{
-          background: "radial-gradient(circle, rgba(255,122,26,0.18) 0%, rgba(255,122,26,0) 70%)",
+          background: "radial-gradient(circle, rgba(255,122,26,0.35) 0%, rgba(255,122,26,0) 70%)",
           filter: "blur(30px)",
         }}
       />
       <div
         className="absolute top-4 -right-16 w-80 h-80 rounded-full pointer-events-none"
         style={{
-          background: "radial-gradient(circle, rgba(255,122,26,0.14) 0%, rgba(255,122,26,0) 70%)",
+          background: "radial-gradient(circle, rgba(255,122,26,0.25) 0%, rgba(255,122,26,0) 70%)",
           filter: "blur(36px)",
         }}
       />
@@ -60,7 +60,7 @@ function Hero({ homesCount = 0, craftsCount = 0, cafesCount = 0 }) {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.15 }}
-          className="mt-10 inline-flex items-center gap-6 bg-white px-8 py-4 rounded-full border border-brand-200 shadow-soft text-base text-ink-soft"
+          className="mt-10 inline-flex items-center gap-6 bg-white/80 backdrop-blur-sm px-8 py-4 rounded-full border border-brand-200 shadow-soft text-base text-ink-soft"
         >
           <span>
             <strong className="text-brand-600 text-xl">
