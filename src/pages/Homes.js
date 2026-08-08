@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { ArrowRight } from "lucide-react";
 import Hero from "../components/Hero";
 import JourneySection from "../components/JourneySection";
 import HowItWorks from "../components/HowItWorks";
 import FAQSection from "../components/FAQSection";
-import CTABanner from "../components/CTABanner";
 import ListingCard from "../components/ListingCard";
 import { useLanguage } from "../context/LanguageContext";
 import { supabase } from "../supabaseClient";
@@ -41,7 +41,7 @@ function Section({ title, subtitle, items, seeAllPath }) {
             reviewCount={item.review_count}
             price={item.price}
             priceLabel={item.price_label}
-            onClick={() => navigate(seeAllPath)}
+            to={seeAllPath}
           />
         ))}
       </div>
@@ -83,6 +83,14 @@ function Home() {
 
   return (
     <div>
+      <Helmet>
+        <title>budgetravel | Homestays, crafts & cafes in Uzbekistan</title>
+        <meta
+          name="description"
+          content="Book real Uzbek homestays, handmade crafts, and family-run cafes directly — no tourist markup. Stay, eat, and shop with real families across Samarkand, Bukhara, Khiva, and Tashkent."
+        />
+      </Helmet>
+
       <Hero homesCount={homes.length} craftsCount={crafts.length} cafesCount={cafes.length} />
       <JourneySection />
 
@@ -117,10 +125,6 @@ function Home() {
 
       <div className="border-t border-black/5">
         <FAQSection />
-      </div>
-
-      <div className="border-t border-black/5">
-        <CTABanner />
       </div>
     </div>
   );
