@@ -6,7 +6,7 @@ function Hero({ homesCount = 0, craftsCount = 0, cafesCount = 0 }) {
   const { t } = useLanguage();
 
   return (
-    <section className="relative bg-[#FFEEDC] pt-24 pb-28 px-6 overflow-hidden">
+    <section className="relative bg-[#FFF3E2] pt-24 pb-28 px-6 overflow-hidden">
       <div
         className="absolute inset-0 dot-grid opacity-60"
         style={{ maskImage: "radial-gradient(ellipse 70% 60% at 50% 30%, black 30%, transparent 90%)" }}
