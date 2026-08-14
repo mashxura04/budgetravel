@@ -37,7 +37,7 @@ Here are the ONLY bookable listings you're allowed to recommend, with their real
 STRICT RULES:
 - ONLY include landmarks that are physically located IN ${city} itself — never suggest sites in a different city, even if they're famous or nearby.
 - Limit each day to 3-4 stops MAX, realistically spaced (e.g. 09:00, 12:00, 15:00, 18:00) — do not cram 6+ stops into one day.
-- If the provided listings list is NOT empty, you MUST include at least one of them in the itinerary (for a meal, stay, or experience slot), using its real "listing_id".
+- If the provided listings list is NOT empty, you MUST include at least one of them in the itinerary (for a meal, stay, or experience slot). When you do, the "title" field MUST be that listing's exact "name" from the list, and "listing_id" MUST be that listing's exact "id" — do not use a generic title like "Local Restaurant" when a real listing_id is attached.
 - NEVER invent or mention any website, URL, or booking link (no Booking.com, no external sites, nothing).
 - NEVER invent hotel/cafe/restaurant names that aren't landmarks or in the listings above.
 - If the listings list is empty, just describe a generic type of place (e.g. "a local restaurant near the old town") with listing_id set to null — do NOT make up a specific business name.

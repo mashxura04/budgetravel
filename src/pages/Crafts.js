@@ -4,6 +4,7 @@ import { Helmet } from "react-helmet-async";
 import SearchBar from "../components/SearchBar";
 import CategoryTabs from "../components/CategoryTabs";
 import ListingCard from "../components/ListingCard";
+import AIAssistant from "../components/AIAssistant";
 import { useLanguage } from "../context/LanguageContext";
 import { supabase } from "../supabaseClient";
 import { localizeListing } from "../utils/localize";
@@ -62,6 +63,8 @@ function Crafts() {
         <h1 className="font-display text-4xl font-semibold text-ink">{t("craftsTitle")}</h1>
         <p className="text-ink-muted mt-2">{t("craftsSubtitle")}</p>
       </div>
+
+      <AIAssistant category="crafts" />
 
       <SearchBar value={query} onChange={setQuery} placeholder={t("searchByNameCity")} />
 
