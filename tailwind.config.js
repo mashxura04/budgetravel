@@ -47,3 +47,6 @@ module.exports = {
   },
   plugins: [],
 };
+
+
+// Budgetravel design system configuration
