@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { Home, Gift, Coffee, LogOut, ChevronDown, BookMarked, Shield, Menu as MenuIcon, X } from "lucide-react";
+import { Home, Gift, Coffee, Sparkles, LogOut, ChevronDown, BookMarked, Shield, Menu as MenuIcon, X } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
 import LanguageSwitcher from "./LanguageSwitcher";
@@ -35,6 +35,7 @@ function Navbar() {
     { label: t("navHomes"), path: "/homes", icon: Home },
     { label: t("navCrafts"), path: "/crafts", icon: Gift },
     { label: t("navCafes"), path: "/cafes", icon: Coffee },
+    { label: "AI Guide", path: "/ai-guide", icon: Sparkles },
   ];
 
   const handleSignOut = async () => {

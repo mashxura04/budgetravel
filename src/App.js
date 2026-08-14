@@ -13,6 +13,7 @@ import MyActivity from "./pages/MyActivity";
 import BecomeHost from "./pages/BecomeHost";
 import Admin from "./pages/Admin";
 import AdminRoute from "./components/AdminRoute";
+import AIGuide from "./pages/AIGuide";
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
         <Route path="/activity" element={<MyActivity />} />
         <Route path="/become-host" element={<BecomeHost />} />
         <Route path="/admin" element={<AdminRoute><Admin /></AdminRoute>} />
+        <Route path="/ai-guide" element={<AIGuide />} />
       </Routes>
       <Footer />
       <AuthModal />
