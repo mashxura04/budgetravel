@@ -19,12 +19,15 @@ export default function AIGuide() {
   return (
     <div className="max-w-2xl mx-auto p-6">
       <h1 className="text-2xl font-bold mb-4">AI Personal Guide</h1>
-      <div className="flex gap-3 mb-6">
+      <div className="flex gap-3 mb-6 items-start">
         <input value={city} onChange={e => setCity(e.target.value)}
           className="border rounded px-3 py-2 flex-1" placeholder="City" />
-        <input type="number" min="1" max="5" value={days}
-          onChange={e => setDays(e.target.value)}
-          className="border rounded px-3 py-2 w-20" />
+        <div className="flex flex-col items-center">
+          <input type="number" min="1" max="5" value={days}
+            onChange={e => setDays(e.target.value)}
+            className="border rounded px-3 py-2 w-20 text-center" />
+          <span className="text-xs text-gray-400 mt-1">days</span>
+        </div>
         <button onClick={generate} disabled={loading}
           className="bg-[#D9731A] text-white px-5 py-2 rounded font-medium">
           {loading ? "Planning..." : "Generate"}
