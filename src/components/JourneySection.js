@@ -1,9 +1,33 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { PlaneTakeoff, Home, Utensils, ShoppingBag, MessageCircleHeart, MapPin } from "lucide-react";
 import { useLanguage } from "../context/LanguageContext";
 
 const ARRIVAL_INTERVAL = 2000;
 const RESET_PAUSE = 900;
+
+// Builds a smooth curve that passes through EVERY point exactly
+// (Catmull-Rom -> cubic Bezier conversion). This replaces the old
+// hand-typed "M ... Q ... T ..." path, which only guaranteed the
+// curve touched 4 of the 5 stop coordinates — stop index 3
+// ("Bring home a craft") was never actually ON the line, which is
+// why the marker/line looked disconnected from that icon (and
+// knock-on, the next one too).
+function smoothPath(points) {
+  if (points.length < 2) return "";
+  let d = `M ${points[0].x} ${points[0].y}`;
+  for (let i = 0; i < points.length - 1; i++) {
+    const p0 = points[i - 1] || points[i];
+    const p1 = points[i];
+    const p2 = points[i + 1];
+    const p3 = points[i + 2] || p2;
+    const cp1x = p1.x + (p2.x - p0.x) / 6;
+    const cp1y = p1.y + (p2.y - p0.y) / 6;
+    const cp2x = p2.x - (p3.x - p1.x) / 6;
+    const cp2y = p2.y - (p3.y - p1.y) / 6;
+    d += ` C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${p2.x} ${p2.y}`;
+  }
+  return d;
+}
 
 function JourneySection() {
   const { t } = useLanguage();
@@ -15,6 +39,9 @@ function JourneySection() {
   // drives the auto-walking line + marker only, never touches icon styling
   const [walkStop, setWalkStop] = useState(0);
   const [walkAnimate, setWalkAnimate] = useState(false);
+
+  const progressPathRef = useRef(null);
+  const [pathLength, setPathLength] = useState(210); // real value measured on mount
 
   const STOPS = [
     {
@@ -64,6 +91,23 @@ function JourneySection() {
     },
   ];
 
+  // recomputed only when STOPS' coordinates would change (they don't at runtime,
+  // but useMemo keeps this from rebuilding the path string every render)
+  const pathD = useMemo(
+    () => smoothPath(STOPS.map((s) => ({ x: s.x, y: s.y }))),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+
+  // measure the ACTUAL rendered length of the curve once it's in the DOM,
+  // instead of assuming a fixed "210" like before — the old constant was
+  // a guess for the old path shape and was never exactly right
+  useEffect(() => {
+    if (progressPathRef.current) {
+      setPathLength(progressPathRef.current.getTotalLength());
+    }
+  }, [pathD]);
+
   const toggleActive = (i) => {
     setActiveIndex((prev) => (prev === i ? null : i));
   };
@@ -99,7 +143,6 @@ function JourneySection() {
   }, []);
 
   const walkCurrent = STOPS[walkStop];
-  const pathD = "M 5 50 Q 27 12 50 50 T 95 50";
 
   return (
     <section className="bg-[#FFFBF7] py-20 overflow-hidden">
@@ -116,19 +159,19 @@ function JourneySection() {
         {/* Desktop: The Great Wavy Journey Road */}
         <div className="hidden sm:block relative pb-10">
 
-          {/* THE ROAD - thin clean line (no more fat footprint dashes), with a
-              marker that actually walks along it and loops forever */}
+          {/* THE ROAD - now guaranteed to pass through all 5 icon coordinates exactly */}
           <div className="absolute left-0 right-0 w-full top-0 h-[150px] z-0 pointer-events-none overflow-visible">
             <svg viewBox="0 0 100 70" className="absolute inset-0 w-full h-full overflow-visible" preserveAspectRatio="none">
               <path d={pathD} fill="none" stroke="#FFD8A8" strokeWidth="0.7" strokeLinecap="round" />
               <path
+                ref={progressPathRef}
                 d={pathD}
                 fill="none"
                 stroke="#FF7A1A"
                 strokeWidth="0.7"
                 strokeLinecap="round"
-                strokeDasharray="210"
-                strokeDashoffset={210 - (210 * walkStop) / (STOPS.length - 1)}
+                strokeDasharray={pathLength}
+                strokeDashoffset={pathLength - (pathLength * walkStop) / (STOPS.length - 1)}
                 style={{
                   transition: walkAnimate ? "stroke-dashoffset 1s cubic-bezier(0.3,0.7,0.3,1)" : "none",
                 }}
@@ -151,11 +194,13 @@ function JourneySection() {
             />
           </div>
 
-          {/* The 5 Steps - icons completely untouched from before */}
+          {/* The 5 Steps */}
           <div className="relative flex justify-between z-10" style={{ transformStyle: "preserve-3d" }}>
             {STOPS.map((stop, i) => {
               const Icon = stop.icon;
               const isActive = activeIndex === i;
+              // true once the walking marker has reached or passed this stop
+              const isPassed = walkStop >= i;
 
               return (
                 <div
@@ -174,9 +219,14 @@ function JourneySection() {
                       type="button"
                       onClick={() => toggleActive(i)}
                       aria-pressed={isActive}
-                      className="relative w-[70px] h-[70px] rounded-full flex items-center justify-center transition-transform duration-300 ease-out shadow-[0_15px_35px_-10px_rgba(0,0,0,0.15)] hover:shadow-[0_20px_45px_-10px_rgba(0,0,0,0.25)] hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-2"
+                      className={`relative w-[70px] h-[70px] rounded-full flex items-center justify-center transition-all duration-300 ease-out hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+                        isPassed ? "scale-105" : ""
+                      }`}
                       style={{
                         background: `linear-gradient(145deg, ${stop.from}, ${stop.to})`,
+                        boxShadow: isPassed
+                          ? `0 0 0 4px #ffffff, 0 0 0 7px ${stop.to}80, 0 15px 35px -10px rgba(0,0,0,0.3)`
+                          : "0 15px 35px -10px rgba(0,0,0,0.15)",
                       }}
                     >
                       <div
