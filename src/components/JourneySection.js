@@ -1,8 +1,10 @@
+import { useState } from "react";
 import { PlaneTakeoff, Home, Utensils, ShoppingBag, MessageCircleHeart } from "lucide-react";
 import { useLanguage } from "../context/LanguageContext";
 
 function JourneySection() {
   const { t } = useLanguage();
+  const [activeIndex, setActiveIndex] = useState(null);
 
   const STOPS = [
     {
@@ -42,6 +44,10 @@ function JourneySection() {
     },
   ];
 
+  const toggleActive = (i) => {
+    setActiveIndex((prev) => (prev === i ? null : i));
+  };
+
   return (
     <section className="bg-[#FFFBF7] py-20 overflow-hidden">
       <div className="max-w-5xl mx-auto px-6">
@@ -56,28 +62,26 @@ function JourneySection() {
 
         {/* Desktop: The Great Wavy Journey Road */}
         <div className="hidden sm:block relative pb-10">
-          
-          {/* THE FLOATING WAVY ROAD - Sitting safely at the bottom */}
-          <div className="absolute left-0 right-0 w-full top-[200px] z-0">
-            {/* A soft, glowing underlay to make it look 3D */}
+
+          {/* THE FLOATING WAVY ROAD - now gently bobbing, not static */}
+          <div className="absolute left-0 right-0 w-full top-[200px] z-0 journey-line-float">
             <svg viewBox="0 0 100 60" className="w-full h-full overflow-visible" preserveAspectRatio="none">
-              <path 
-                d="M 2 35 C 25 50, 45 45, 50 35 S 75 25, 98 35" 
-                fill="none" 
-                stroke="#FF9E5E" 
-                strokeWidth="8" 
-                strokeLinecap="round" 
+              <path
+                d="M 2 35 C 25 50, 45 45, 50 35 S 75 25, 98 35"
+                fill="none"
+                stroke="#FF9E5E"
+                strokeWidth="8"
+                strokeLinecap="round"
                 className="journey-shadow-line"
                 opacity="0.4"
                 filter="blur(6px)"
               />
-              {/* The bold, thick painted path - exactly like your yellow draft */}
-              <path 
-                d="M 2 35 C 25 50, 45 45, 50 35 S 75 25, 98 35" 
-                fill="none" 
-                stroke="#FF7A1A" 
-                strokeWidth="6" 
-                strokeLinecap="round" 
+              <path
+                d="M 2 35 C 25 50, 45 45, 50 35 S 75 25, 98 35"
+                fill="none"
+                stroke="#FF7A1A"
+                strokeWidth="6"
+                strokeLinecap="round"
                 className="journey-path-line"
               />
             </svg>
@@ -87,48 +91,48 @@ function JourneySection() {
           <div className="relative flex justify-between z-10" style={{ transformStyle: "preserve-3d" }}>
             {STOPS.map((stop, i) => {
               const Icon = stop.icon;
-              
+              const isActive = activeIndex === i;
+
               return (
-                <div 
-                  key={stop.label} 
-                  className="flex flex-col items-center w-32 text-center group cursor-default relative"
-                  style={{ 
-                    marginTop: i % 2 === 0 ? 60 : 25, 
-                    transform: "translateZ(30px)"
+                <div
+                  key={stop.label}
+                  className="flex flex-col items-center w-32 text-center group relative"
+                  style={{
+                    marginTop: i % 2 === 0 ? 60 : 25,
+                    transform: "translateZ(30px)",
                   }}
                 >
-                  {/* 3D Icon Bubble */}
-                  <div 
-                    className="relative w-[70px] h-[70px] rounded-full flex items-center justify-center transition-all duration-500 ease-out shadow-[0_15px_35px_-10px_rgba(0,0,0,0.15)] hover:shadow-[0_20px_45px_-10px_rgba(0,0,0,0.25)] hover:scale-110"
+                  {/* 3D Icon Bubble - now clickable to reveal its caption */}
+                  <button
+                    type="button"
+                    onClick={() => toggleActive(i)}
+                    aria-pressed={isActive}
+                    className="relative w-[70px] h-[70px] rounded-full flex items-center justify-center transition-all duration-500 ease-out shadow-[0_15px_35px_-10px_rgba(0,0,0,0.15)] hover:shadow-[0_20px_45px_-10px_rgba(0,0,0,0.25)] hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-2"
                     style={{
                       background: `linear-gradient(145deg, ${stop.from}, ${stop.to})`,
                     }}
                   >
-                    <div className="absolute inset-0 rounded-full bg-white opacity-20 blur-md" style={{ top: '-2px', left: '-2px', width: '110%', height: '110%' }} />
+                    <div
+                      className="absolute inset-0 rounded-full bg-white opacity-20 blur-md"
+                      style={{ top: "-2px", left: "-2px", width: "110%", height: "110%" }}
+                    />
                     <Icon size={28} color="#ffffff" strokeWidth={2} className="relative z-10 drop-shadow-md" />
-                  </div>
+                  </button>
 
-                  {/* Text Section - Pushed down to make room for the line */}
-                  <div className="mt-5 h-[70px] flex flex-col justify-start items-center">
+                  {/* Text Section - label always visible, detail reveals on click */}
+                  <div className="mt-5 h-[70px] flex flex-col justify-start items-center overflow-hidden">
                     <p className="text-[15px] font-bold text-[#1a1a1a] tracking-wide">
                       {stop.label}
                     </p>
-                    
-                    {i === 0 && (
-                      <p className="text-[13px] text-[#D85A30] font-medium mt-1 font-serif leading-tight">
-                        Touch down and start<br />exploring
-                      </p>
-                    )}
-                    {i === 1 && (
-                      <p className="text-[13px] text-[#1D9E75] font-medium mt-1 font-serif leading-tight">
-                        Real homes, real<br />hospitality
-                      </p>
-                    )}
-                    {i === 2 && (
-                      <p className="text-[13px] text-[#E38A00] font-medium mt-1 font-serif leading-tight">
-                        Home cooked, not<br />tourist priced
-                      </p>
-                    )}
+
+                    <p
+                      className={`text-[13px] font-medium mt-1 font-serif leading-tight transition-all duration-300 ease-out ${
+                        isActive ? "opacity-100 max-h-10 translate-y-0" : "opacity-0 max-h-0 -translate-y-1"
+                      }`}
+                      style={{ color: stop.to }}
+                    >
+                      {stop.detail}
+                    </p>
                   </div>
                 </div>
               );
@@ -142,19 +146,28 @@ function JourneySection() {
           <div className="space-y-8">
             {STOPS.map((stop, i) => {
               const Icon = stop.icon;
+              const isActive = activeIndex === i;
               return (
                 <div key={stop.label} className="relative flex items-start gap-4">
-                  <div
+                  <button
+                    type="button"
+                    onClick={() => toggleActive(i)}
+                    aria-pressed={isActive}
                     className="relative w-11 h-11 rounded-full border-2 border-white flex items-center justify-center shrink-0 z-10 shadow-md"
                     style={{ background: `linear-gradient(145deg, ${stop.from}, ${stop.to})` }}
                   >
                     <Icon size={18} color="#ffffff" strokeWidth={2} />
-                  </div>
+                  </button>
                   <div className="pt-1">
                     <p className="text-[15px] text-[#1a1a1a] font-bold">{stop.label}</p>
-                    {i === 0 && <p className="text-xs mt-0.5 text-[#D85A30] font-serif leading-tight">Touch down and start exploring</p>}
-                    {i === 1 && <p className="text-xs mt-0.5 text-[#1D9E75] font-serif leading-tight">Real homes, real hospitality</p>}
-                    {i === 2 && <p className="text-xs mt-0.5 text-[#E38A00] font-serif leading-tight">Home cooked, not tourist priced</p>}
+                    <p
+                      className={`text-xs mt-0.5 font-serif leading-tight transition-all duration-300 ease-out overflow-hidden ${
+                        isActive ? "opacity-100 max-h-10" : "opacity-0 max-h-0"
+                      }`}
+                      style={{ color: stop.to }}
+                    >
+                      {stop.detail}
+                    </p>
                   </div>
                 </div>
               );
@@ -176,6 +189,16 @@ function JourneySection() {
           0% { stroke-dashoffset: 200; opacity: 0; }
           20% { opacity: 1; }
           100% { stroke-dashoffset: 0; opacity: 1; }
+        }
+
+        /* Gentle continuous floating, independent of the draw-in animation */
+        .journey-line-float {
+          animation: floatGently 4.5s ease-in-out infinite;
+        }
+
+        @keyframes floatGently {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(8px); }
         }
       `}</style>
     </section>
