@@ -4,3 +4,5 @@ module.exports = {
     autoprefixer: {},
   },
 };
+
+// Budgetravel CSS processing configuration
