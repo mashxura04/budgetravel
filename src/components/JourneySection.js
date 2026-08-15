@@ -54,34 +54,36 @@ function JourneySection() {
           </h2>
         </div>
 
-        {/* Desktop: The Great Journey */}
-        <div className="hidden sm:block relative pb-20">
+        {/* Desktop: The Great Wavy Journey Road */}
+        <div className="hidden sm:block relative pb-10">
           
-          {/* THE FLOATING LINE - Pushed below everything */}
-          <div className="absolute left-0 right-0 w-full top-[160px] z-0">
+          {/* THE FLOATING WAVY ROAD - Sitting safely at the bottom */}
+          <div className="absolute left-0 right-0 w-full top-[200px] z-0">
+            {/* A soft, glowing underlay to make it look 3D */}
             <svg viewBox="0 0 100 60" className="w-full h-full overflow-visible" preserveAspectRatio="none">
-              {/* Glowing underlying aura */}
               <path 
-                d="M 5 45 C 27 60, 50 30, 95 45" 
+                d="M 2 35 C 25 50, 45 45, 50 35 S 75 25, 98 35" 
+                fill="none" 
+                stroke="#FF9E5E" 
+                strokeWidth="8" 
+                strokeLinecap="round" 
+                className="journey-shadow-line"
+                opacity="0.4"
+                filter="blur(6px)"
+              />
+              {/* The bold, thick painted path - exactly like your yellow draft */}
+              <path 
+                d="M 2 35 C 25 50, 45 45, 50 35 S 75 25, 98 35" 
                 fill="none" 
                 stroke="#FF7A1A" 
                 strokeWidth="6" 
-                strokeLinecap="round" 
-                className="journey-glow-line"
-              />
-              {/* The crisp moving ribbon */}
-              <path 
-                d="M 5 45 C 27 60, 50 30, 95 45" 
-                fill="none" 
-                stroke="#FF9E5E" 
-                strokeWidth="3" 
                 strokeLinecap="round" 
                 className="journey-path-line"
               />
             </svg>
           </div>
 
-          {/* The 5 Steps */}
+          {/* The 5 Steps - Sitting perfectly above the road */}
           <div className="relative flex justify-between z-10" style={{ transformStyle: "preserve-3d" }}>
             {STOPS.map((stop, i) => {
               const Icon = stop.icon;
@@ -91,11 +93,11 @@ function JourneySection() {
                   key={stop.label} 
                   className="flex flex-col items-center w-32 text-center group cursor-default relative"
                   style={{ 
-                    marginTop: i % 2 === 0 ? 60 : 25, // Creates the wave pattern
+                    marginTop: i % 2 === 0 ? 60 : 25, 
                     transform: "translateZ(30px)"
                   }}
                 >
-                  {/* Icon Bubble */}
+                  {/* 3D Icon Bubble */}
                   <div 
                     className="relative w-[70px] h-[70px] rounded-full flex items-center justify-center transition-all duration-500 ease-out shadow-[0_15px_35px_-10px_rgba(0,0,0,0.15)] hover:shadow-[0_20px_45px_-10px_rgba(0,0,0,0.25)] hover:scale-110"
                     style={{
@@ -106,8 +108,8 @@ function JourneySection() {
                     <Icon size={28} color="#ffffff" strokeWidth={2} className="relative z-10 drop-shadow-md" />
                   </div>
 
-                  {/* Text - Pushed WAY down so the line never touches */}
-                  <div className="mt-6 h-[60px] flex flex-col justify-start items-center">
+                  {/* Text Section - Pushed down to make room for the line */}
+                  <div className="mt-5 h-[70px] flex flex-col justify-start items-center">
                     <p className="text-[15px] font-bold text-[#1a1a1a] tracking-wide">
                       {stop.label}
                     </p>
@@ -163,19 +165,11 @@ function JourneySection() {
 
       {/* CSS ANIMATIONS */}
       <style jsx>{`
-        /* The main line draws itself smoothly from Left to Right */
+        /* The bold road draws itself smoothly from Left to Right */
         .journey-path-line {
           stroke-dasharray: 200;
           stroke-dashoffset: 200;
           animation: drawLine 2.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-        }
-
-        /* The glowing shadow appears with a slight delay for a magical effect */
-        .journey-glow-line {
-          stroke-dasharray: 200;
-          stroke-dashoffset: 200;
-          animation: drawLine 2.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-          opacity: 0.3;
         }
 
         @keyframes drawLine {
