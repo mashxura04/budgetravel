@@ -1,14 +1,8 @@
-import { useEffect, useState } from "react";
-import { PlaneTakeoff, Home, Utensils, ShoppingBag, MessageCircleHeart, MapPin } from "lucide-react";
+import { PlaneTakeoff, Home, Utensils, ShoppingBag, MessageCircleHeart } from "lucide-react";
 import { useLanguage } from "../context/LanguageContext";
-
-const ARRIVAL_INTERVAL = 2000;
-const RESET_PAUSE = 900;
 
 function JourneySection() {
   const { t } = useLanguage();
-  const [activeStop, setActiveStop] = useState(0);
-  const [animate, setAnimate] = useState(false);
 
   const STOPS = [
     {
@@ -68,36 +62,6 @@ function JourneySection() {
     },
   ];
 
-  useEffect(() => {
-    let idx = 0;
-    let timeout;
-
-    function step() {
-      if (idx === STOPS.length - 1) {
-        timeout = setTimeout(() => {
-          idx = 0;
-          setAnimate(false);
-          setActiveStop(0);
-          scheduleNext();
-        }, RESET_PAUSE);
-      } else {
-        idx++;
-        setAnimate(true);
-        setActiveStop(idx);
-        scheduleNext();
-      }
-    }
-
-    function scheduleNext() {
-      timeout = setTimeout(step, ARRIVAL_INTERVAL);
-    }
-
-    scheduleNext();
-    return () => clearTimeout(timeout);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const current = STOPS[activeStop];
   const pathD = "M 5 50 Q 27 12 50 50 T 95 50";
 
   return (
@@ -112,154 +76,100 @@ function JourneySection() {
           </h2>
         </div>
 
-        {/* DESKTOP: 3D Perspective Curved Path */}
-        <div className="hidden sm:block relative overflow-visible" style={{ height: 220, perspective: "800px", transformStyle: "preserve-3d" }}>
+        {/* Desktop: 3D Animated Journey Map */}
+        <div 
+          className="hidden sm:block relative overflow-visible" 
+          style={{ height: 220, perspective: "1000px", transformStyle: "preserve-3d" }}
+        >
           
-          {/* The SVG Line - Wrapped in a 3D tilted container */}
-          <div className="absolute inset-0 w-full" style={{ height: 140, top: 25, transform: "rotateX(5deg)" }}>
+          {/* 3D Tilted Line */}
+          <div className="absolute inset-0 w-full" style={{ height: 140, top: 25, transform: "rotateX(8deg)" }}>
             <svg viewBox="0 0 100 70" className="w-full h-full overflow-visible" preserveAspectRatio="none">
-              {/* Base line */}
-              <path d={pathD} fill="none" stroke="#FFD8A8" strokeWidth="0.7" strokeLinecap="round" />
-              {/* Active animated line */}
-              <path
-                d={pathD}
-                fill="none"
-                stroke="#FF7A1A"
-                strokeWidth="0.9"
-                strokeLinecap="round"
-                strokeDasharray="210"
-                strokeDashoffset={210 - (210 * activeStop) / (STOPS.length - 1)}
-                style={{ transition: animate ? "stroke-dashoffset 1s cubic-bezier(0.3,0.7,0.3,1)" : "none" }}
+              <path 
+                d={pathD} 
+                fill="none" 
+                stroke="#FF7A1A" 
+                strokeWidth="0.7" 
+                strokeLinecap="round" 
+                className="journey-path-line"
               />
             </svg>
           </div>
 
-          {/* Floating Map Pin with 3D shadow */}
-          <MapPin
-            size={26}
-            className="absolute z-20 drop-shadow-xl"
-            style={{
-              left: `${current.x}%`,
-              top: `${25 + (current.y / 100) * 140 - 26}px`,
-              transform: "translateX(-50%)",
-              color: current.to,
-              transition: animate ? "left 1s cubic-bezier(0.3,0.7,0.3,1), top 1s cubic-bezier(0.3,0.7,0.3,1)" : "none",
-              filter: "drop-shadow(0 4px 6px rgba(0,0,0,0.2))"
-            }}
-            fill={current.to}
-          />
-
-          {/* Stops - Each gets a Floating & Bouncing animation based on its position */}
+          {/* The 5 Steps */}
           <div className="relative flex justify-between" style={{ marginTop: 40, transformStyle: "preserve-3d" }}>
             {STOPS.map((stop, i) => {
               const Icon = stop.icon;
-              const isActive = activeStop === i;
-              const isPast = i < activeStop;
-              
-              // Custom floating delays for each stop
-              const floatDelay = i * 0.2;
+              // Float delay makes them look like they are waving
+              const floatDelay = i * 0.15; 
               
               return (
                 <div 
                   key={stop.label} 
-                  className="flex flex-col items-center w-32 text-center group"
+                  className="flex flex-col items-center w-32 text-center group cursor-default"
                   style={{ 
                     marginTop: i % 2 === 0 ? 38 : 0,
-                    animation: `floatUpDown 3s ease-in-out ${floatDelay}s infinite`,
-                    transform: "translateZ(20px)" // Pulls the elements forward in 3D space
+                    animation: `floatUpDown 3.5s ease-in-out ${floatDelay}s infinite`,
+                    transform: "translateZ(20px)" 
                   }}
                 >
-                  <div className="relative w-[52px] h-[52px] flex items-center justify-center">
-                    {isActive && (
-                      <span
-                        className="absolute inset-0 rounded-full animate-ping opacity-30"
-                        style={{ backgroundColor: stop.to }}
-                      />
-                    )}
-                    <div
-                      className="relative w-[46px] h-[46px] rounded-full flex items-center justify-center transition-all duration-400 shadow-lg group-hover:scale-110"
-                      style={{
-                        background: isActive
-                          ? `linear-gradient(135deg, ${stop.from}, ${stop.to})`
-                          : isPast
-                          ? stop.tint
-                          : "#F7F7F5",
-                        border: isActive || isPast ? "none" : "1px solid #E8E4DD",
-                        transform: isActive ? "scale(1.15) translateZ(30px)" : "scale(1) translateZ(10px)",
-                        boxShadow: isActive ? `0 10px 25px ${stop.to}55` : "0 4px 6px rgba(0,0,0,0.05)"
-                      }}
-                    >
-                      <Icon
-                        size={20}
-                        color={isActive ? "#fff" : isPast ? stop.dark : "#9CA3AF"}
-                        strokeWidth={2}
-                      />
-                    </div>
+                  {/* The 3D Bubble Container */}
+                  <div 
+                    className="relative w-[56px] h-[56px] rounded-full flex items-center justify-center transition-all duration-500 ease-out"
+                    style={{
+                      background: stop.tint,
+                      boxShadow: "0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.05)",
+                      transform: "translateZ(10px)"
+                    }}
+                  >
+                    {/* Hover Glow */}
+                    <div className="absolute inset-0 rounded-full opacity-0 transition-opacity duration-300 group-hover:opacity-20 blur-md" style={{ backgroundColor: stop.to }} />
+                    
+                    {/* Icon */}
+                    <Icon
+                      size={22}
+                      color={stop.dark}
+                      strokeWidth={1.5}
+                      className="relative z-10 transition-transform duration-300 group-hover:scale-110"
+                    />
                   </div>
+
+                  {/* Text Label */}
                   <p
-                    className={`mt-2.5 text-xs leading-snug transition-colors duration-300 ${
-                      isActive ? "text-ink font-bold" : isPast ? "text-ink-soft font-medium" : "text-neutral-400 font-medium"
-                    }`}
+                    className={`mt-3 text-sm leading-snug text-[#1a1a1a] font-semibold transition-colors duration-300`}
                   >
                     {stop.label}
                   </p>
+                  
+                  {/* The "Memories that stay with you" text under the 3rd item */}
+                  {i === 2 && (
+                    <p className="text-xs text-[#b13e6f] font-medium mt-1 font-serif">
+                      {stop.detail}
+                    </p>
+                  )}
                 </div>
               );
             })}
           </div>
-
-          <p className="text-center text-sm font-medium mt-3 h-5" style={{ color: current.to }}>
-            {current.detail}
-          </p>
         </div>
 
-        {/* MOBILE: Vertical Timeline (Kept exactly the same as yours, untouched) */}
+        {/* Mobile: Vertical Timeline (Kept untouched for responsiveness) */}
         <div className="sm:hidden relative pl-8">
           <div className="absolute left-[19px] top-2 bottom-2 w-[2px] bg-neutral-200 rounded-full" />
           <div className="space-y-7">
             {STOPS.map((stop, i) => {
               const Icon = stop.icon;
-              const isActive = activeStop === i;
-              const isPast = i < activeStop;
               return (
                 <div key={stop.label} className="relative flex items-start gap-4">
-                  {isActive && (
-                    <span
-                      className="absolute left-0 top-0 w-11 h-11 rounded-full animate-ping opacity-30"
-                      style={{ backgroundColor: stop.to }}
-                    />
-                  )}
                   <div
-                    className="relative w-11 h-11 rounded-full border-2 border-white flex items-center justify-center shrink-0 z-10 transition-all duration-400"
-                    style={{
-                      background: isActive
-                        ? `linear-gradient(135deg, ${stop.from}, ${stop.to})`
-                        : isPast
-                        ? stop.tint
-                        : "#F7F7F5",
-                      boxShadow: isActive ? `0 6px 14px ${stop.to}55` : "none",
-                      transform: isActive ? "scale(1.08)" : "scale(1)",
-                    }}
+                    className="relative w-11 h-11 rounded-full border-2 border-white flex items-center justify-center shrink-0 z-10"
+                    style={{ background: stop.tint }}
                   >
-                    <Icon
-                      size={18}
-                      color={isActive ? "#fff" : isPast ? stop.dark : "#9CA3AF"}
-                      strokeWidth={2}
-                    />
+                    <Icon size={18} color={stop.dark} strokeWidth={2} />
                   </div>
                   <div className="pt-1.5">
-                    <p
-                      className={`text-sm transition-colors duration-300 ${
-                        isActive ? "text-ink font-bold" : isPast ? "text-ink-soft font-semibold" : "text-neutral-400 font-semibold"
-                      }`}
-                    >
-                      {stop.label}
-                    </p>
-                    {isActive && (
-                      <p className="text-xs mt-0.5 font-medium" style={{ color: stop.to }}>
-                        {stop.detail}
-                      </p>
-                    )}
+                    <p className="text-sm text-[#1a1a1a] font-bold">{stop.label}</p>
+                    {i === 2 && <p className="text-xs mt-0.5 text-[#b13e6f] font-medium">{stop.detail}</p>}
                   </div>
                 </div>
               );
@@ -268,11 +178,22 @@ function JourneySection() {
         </div>
       </div>
 
-      {/* INLINE CSS KEYFRAMES (Added safely right here) */}
+      {/* INLINE CSS KEYFRAMES FOR ANIMATION */}
       <style jsx>{`
         @keyframes floatUpDown {
           0%, 100% { transform: translateZ(20px) translateY(0px); }
-          50% { transform: translateZ(20px) translateY(-6px); }
+          50% { transform: translateZ(20px) translateY(-8px); }
+        }
+        
+        /* Draw the line animation on page load */
+        .journey-path-line {
+          stroke-dasharray: 300;
+          stroke-dashoffset: 300;
+          animation: drawLine 2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        @keyframes drawLine {
+          to { stroke-dashoffset: 0; }
         }
       `}</style>
     </section>
