@@ -63,21 +63,21 @@ function JourneySection() {
         {/* Desktop: The Great Wavy Journey Road */}
         <div className="hidden sm:block relative pb-10">
 
-          {/* THE FLOATING WAVY ROAD - now gently bobbing, not static */}
-          <div className="absolute left-0 right-0 w-full top-[200px] z-0 journey-line-float">
+          {/* THE ROAD - now a consistent, evenly-sized wave that threads through
+              each icon's actual zigzag height, with a continuous flowing motion */}
+          <div className="absolute left-0 right-0 w-full top-[45px] h-[140px] z-0 pointer-events-none">
             <svg viewBox="0 0 100 60" className="w-full h-full overflow-visible" preserveAspectRatio="none">
               <path
-                d="M 2 35 C 25 50, 45 45, 50 35 S 75 25, 98 35"
+                d="M2,45 C10,45 18,25 26,25 C34,25 42,45 50,45 C58,45 66,25 74,25 C82,25 90,45 98,45"
                 fill="none"
                 stroke="#FF9E5E"
                 strokeWidth="8"
                 strokeLinecap="round"
-                className="journey-shadow-line"
-                opacity="0.4"
+                opacity="0.35"
                 filter="blur(6px)"
               />
               <path
-                d="M 2 35 C 25 50, 45 45, 50 35 S 75 25, 98 35"
+                d="M2,45 C10,45 18,25 26,25 C34,25 42,45 50,45 C58,45 66,25 74,25 C82,25 90,45 98,45"
                 fill="none"
                 stroke="#FF7A1A"
                 strokeWidth="6"
@@ -87,7 +87,7 @@ function JourneySection() {
             </svg>
           </div>
 
-          {/* The 5 Steps - Sitting perfectly above the road */}
+          {/* The 5 Steps */}
           <div className="relative flex justify-between z-10" style={{ transformStyle: "preserve-3d" }}>
             {STOPS.map((stop, i) => {
               const Icon = stop.icon;
@@ -102,32 +102,37 @@ function JourneySection() {
                     transform: "translateZ(30px)",
                   }}
                 >
-                  {/* 3D Icon Bubble - now clickable to reveal its caption */}
-                  <button
-                    type="button"
-                    onClick={() => toggleActive(i)}
-                    aria-pressed={isActive}
-                    className="relative w-[70px] h-[70px] rounded-full flex items-center justify-center transition-all duration-500 ease-out shadow-[0_15px_35px_-10px_rgba(0,0,0,0.15)] hover:shadow-[0_20px_45px_-10px_rgba(0,0,0,0.25)] hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-2"
-                    style={{
-                      background: `linear-gradient(145deg, ${stop.from}, ${stop.to})`,
-                    }}
+                  {/* Icon bubble: idle floating animation (staggered per icon) + click to reveal caption */}
+                  <div
+                    className="journey-icon-float"
+                    style={{ animationDelay: `${i * 0.3}s` }}
                   >
-                    <div
-                      className="absolute inset-0 rounded-full bg-white opacity-20 blur-md"
-                      style={{ top: "-2px", left: "-2px", width: "110%", height: "110%" }}
-                    />
-                    <Icon size={28} color="#ffffff" strokeWidth={2} className="relative z-10 drop-shadow-md" />
-                  </button>
+                    <button
+                      type="button"
+                      onClick={() => toggleActive(i)}
+                      aria-pressed={isActive}
+                      className="relative w-[70px] h-[70px] rounded-full flex items-center justify-center transition-transform duration-300 ease-out shadow-[0_15px_35px_-10px_rgba(0,0,0,0.15)] hover:shadow-[0_20px_45px_-10px_rgba(0,0,0,0.25)] hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-2"
+                      style={{
+                        background: `linear-gradient(145deg, ${stop.from}, ${stop.to})`,
+                      }}
+                    >
+                      <div
+                        className="absolute inset-0 rounded-full bg-white opacity-20 blur-md"
+                        style={{ top: "-2px", left: "-2px", width: "110%", height: "110%" }}
+                      />
+                      <Icon size={28} color="#ffffff" strokeWidth={2} className="relative z-10 drop-shadow-md" />
+                    </button>
+                  </div>
 
-                  {/* Text Section - label always visible, detail reveals on click */}
-                  <div className="mt-5 h-[70px] flex flex-col justify-start items-center overflow-hidden">
+                  {/* Text: label always visible, detail fades in/out on click (no clipping) */}
+                  <div className="mt-5 h-[70px] flex flex-col justify-start items-center">
                     <p className="text-[15px] font-bold text-[#1a1a1a] tracking-wide">
                       {stop.label}
                     </p>
 
                     <p
-                      className={`text-[13px] font-medium mt-1 font-serif leading-tight transition-all duration-300 ease-out ${
-                        isActive ? "opacity-100 max-h-10 translate-y-0" : "opacity-0 max-h-0 -translate-y-1"
+                      className={`text-[13px] font-medium mt-1 font-serif leading-tight transition-opacity duration-300 ease-out ${
+                        isActive ? "opacity-100" : "opacity-0 pointer-events-none"
                       }`}
                       style={{ color: stop.to }}
                     >
@@ -161,8 +166,8 @@ function JourneySection() {
                   <div className="pt-1">
                     <p className="text-[15px] text-[#1a1a1a] font-bold">{stop.label}</p>
                     <p
-                      className={`text-xs mt-0.5 font-serif leading-tight transition-all duration-300 ease-out overflow-hidden ${
-                        isActive ? "opacity-100 max-h-10" : "opacity-0 max-h-0"
+                      className={`text-xs mt-0.5 font-serif leading-tight transition-opacity duration-300 ease-out ${
+                        isActive ? "opacity-100" : "opacity-0 pointer-events-none"
                       }`}
                       style={{ color: stop.to }}
                     >
@@ -178,27 +183,26 @@ function JourneySection() {
 
       {/* CSS ANIMATIONS */}
       <style jsx>{`
-        /* The bold road draws itself smoothly from Left to Right */
+        /* Draws in once, then keeps flowing continuously left to right */
         .journey-path-line {
-          stroke-dasharray: 200;
-          stroke-dashoffset: 200;
-          animation: drawLine 2.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+          stroke-dasharray: 6 10;
+          stroke-dashoffset: 0;
+          animation: flowLine 3s linear infinite;
         }
 
-        @keyframes drawLine {
-          0% { stroke-dashoffset: 200; opacity: 0; }
-          20% { opacity: 1; }
-          100% { stroke-dashoffset: 0; opacity: 1; }
+        @keyframes flowLine {
+          from { stroke-dashoffset: 0; }
+          to { stroke-dashoffset: -160; }
         }
 
-        /* Gentle continuous floating, independent of the draw-in animation */
-        .journey-line-float {
-          animation: floatGently 4.5s ease-in-out infinite;
+        /* Gentle idle floating for each icon bubble, staggered per icon */
+        .journey-icon-float {
+          animation: iconFloat 3.2s ease-in-out infinite;
         }
 
-        @keyframes floatGently {
+        @keyframes iconFloat {
           0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(8px); }
+          50% { transform: translateY(-8px); }
         }
       `}</style>
     </section>
