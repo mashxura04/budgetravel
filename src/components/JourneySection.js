@@ -1,16 +1,28 @@
-import { useState } from "react";
-import { PlaneTakeoff, Home, Utensils, ShoppingBag, MessageCircleHeart } from "lucide-react";
+import { useEffect, useState } from "react";
+import { PlaneTakeoff, Home, Utensils, ShoppingBag, MessageCircleHeart, MapPin } from "lucide-react";
 import { useLanguage } from "../context/LanguageContext";
+
+const ARRIVAL_INTERVAL = 2000;
+const RESET_PAUSE = 900;
 
 function JourneySection() {
   const { t } = useLanguage();
+
+  // separate from the walking-line state below: this only controls
+  // click-to-reveal captions under each icon, untouched from before
   const [activeIndex, setActiveIndex] = useState(null);
+
+  // drives the auto-walking line + marker only, never touches icon styling
+  const [walkStop, setWalkStop] = useState(0);
+  const [walkAnimate, setWalkAnimate] = useState(false);
 
   const STOPS = [
     {
       icon: PlaneTakeoff,
       label: t("journeyStop1"),
       detail: "Touch down and start exploring",
+      x: 5,
+      y: 50,
       from: "#F0997B",
       to: "#D85A30",
     },
@@ -18,6 +30,8 @@ function JourneySection() {
       icon: Home,
       label: t("journeyStop2"),
       detail: "Real homes, real hospitality",
+      x: 27,
+      y: 15,
       from: "#5DCAA5",
       to: "#1D9E75",
     },
@@ -25,6 +39,8 @@ function JourneySection() {
       icon: Utensils,
       label: t("journeyStop3"),
       detail: "Home cooked, not tourist priced",
+      x: 50,
+      y: 50,
       from: "#F5B94D",
       to: "#E38A00",
     },
@@ -32,6 +48,8 @@ function JourneySection() {
       icon: ShoppingBag,
       label: t("journeyStop4"),
       detail: t("journeyStop4Detail"),
+      x: 73,
+      y: 15,
       from: "#AFA9EC",
       to: "#7F77DD",
     },
@@ -39,6 +57,8 @@ function JourneySection() {
       icon: MessageCircleHeart,
       label: t("journeyStop5"),
       detail: t("journeyStop5Detail"),
+      x: 95,
+      y: 50,
       from: "#ED93B1",
       to: "#D4537E",
     },
@@ -47,6 +67,39 @@ function JourneySection() {
   const toggleActive = (i) => {
     setActiveIndex((prev) => (prev === i ? null : i));
   };
+
+  // auto-advancing walking marker, looping forever — same timing/logic as the old version
+  useEffect(() => {
+    let idx = 0;
+    let timeout;
+
+    function step() {
+      if (idx === STOPS.length - 1) {
+        timeout = setTimeout(() => {
+          idx = 0;
+          setWalkAnimate(false);
+          setWalkStop(0);
+          scheduleNext();
+        }, RESET_PAUSE);
+      } else {
+        idx++;
+        setWalkAnimate(true);
+        setWalkStop(idx);
+        scheduleNext();
+      }
+    }
+
+    function scheduleNext() {
+      timeout = setTimeout(step, ARRIVAL_INTERVAL);
+    }
+
+    scheduleNext();
+    return () => clearTimeout(timeout);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const walkCurrent = STOPS[walkStop];
+  const pathD = "M 5 50 Q 27 12 50 50 T 95 50";
 
   return (
     <section className="bg-[#FFFBF7] py-20 overflow-hidden">
@@ -63,31 +116,42 @@ function JourneySection() {
         {/* Desktop: The Great Wavy Journey Road */}
         <div className="hidden sm:block relative pb-10">
 
-          {/* THE ROAD - now a consistent, evenly-sized wave that threads through
-              each icon's actual zigzag height, with a continuous flowing motion */}
-          <div className="absolute left-0 right-0 w-full top-[45px] h-[140px] z-0 pointer-events-none">
-            <svg viewBox="0 0 100 60" className="w-full h-full overflow-visible" preserveAspectRatio="none">
+          {/* THE ROAD - thin clean line (no more fat footprint dashes), with a
+              marker that actually walks along it and loops forever */}
+          <div className="absolute left-0 right-0 w-full top-0 h-[150px] z-0 pointer-events-none overflow-visible">
+            <svg viewBox="0 0 100 70" className="absolute inset-0 w-full h-full overflow-visible" preserveAspectRatio="none">
+              <path d={pathD} fill="none" stroke="#FFD8A8" strokeWidth="0.7" strokeLinecap="round" />
               <path
-                d="M2,45 C10,45 18,25 26,25 C34,25 42,45 50,45 C58,45 66,25 74,25 C82,25 90,45 98,45"
-                fill="none"
-                stroke="#FF9E5E"
-                strokeWidth="8"
-                strokeLinecap="round"
-                opacity="0.35"
-                filter="blur(6px)"
-              />
-              <path
-                d="M2,45 C10,45 18,25 26,25 C34,25 42,45 50,45 C58,45 66,25 74,25 C82,25 90,45 98,45"
+                d={pathD}
                 fill="none"
                 stroke="#FF7A1A"
-                strokeWidth="6"
+                strokeWidth="0.7"
                 strokeLinecap="round"
-                className="journey-path-line"
+                strokeDasharray="210"
+                strokeDashoffset={210 - (210 * walkStop) / (STOPS.length - 1)}
+                style={{
+                  transition: walkAnimate ? "stroke-dashoffset 1s cubic-bezier(0.3,0.7,0.3,1)" : "none",
+                }}
               />
             </svg>
+
+            <MapPin
+              size={22}
+              className="absolute z-20"
+              style={{
+                left: `${walkCurrent.x}%`,
+                top: `${(walkCurrent.y / 70) * 150 - 22}px`,
+                transform: "translateX(-50%)",
+                color: walkCurrent.to,
+                transition: walkAnimate
+                  ? "left 1s cubic-bezier(0.3,0.7,0.3,1), top 1s cubic-bezier(0.3,0.7,0.3,1)"
+                  : "none",
+              }}
+              fill={walkCurrent.to}
+            />
           </div>
 
-          {/* The 5 Steps */}
+          {/* The 5 Steps - icons completely untouched from before */}
           <div className="relative flex justify-between z-10" style={{ transformStyle: "preserve-3d" }}>
             {STOPS.map((stop, i) => {
               const Icon = stop.icon;
@@ -102,7 +166,6 @@ function JourneySection() {
                     transform: "translateZ(30px)",
                   }}
                 >
-                  {/* Icon bubble: idle floating animation (staggered per icon) + click to reveal caption */}
                   <div
                     className="journey-icon-float"
                     style={{ animationDelay: `${i * 0.3}s` }}
@@ -124,7 +187,6 @@ function JourneySection() {
                     </button>
                   </div>
 
-                  {/* Text: label always visible, detail fades in/out on click (no clipping) */}
                   <div className="mt-5 h-[70px] flex flex-col justify-start items-center">
                     <p className="text-[15px] font-bold text-[#1a1a1a] tracking-wide">
                       {stop.label}
@@ -145,7 +207,7 @@ function JourneySection() {
           </div>
         </div>
 
-        {/* Mobile: Vertical Timeline */}
+        {/* Mobile: Vertical Timeline - unchanged, still click-based */}
         <div className="sm:hidden relative pl-8">
           <div className="absolute left-[19px] top-2 bottom-2 w-[2px] bg-neutral-200 rounded-full" />
           <div className="space-y-8">
@@ -181,21 +243,8 @@ function JourneySection() {
         </div>
       </div>
 
-      {/* CSS ANIMATIONS */}
+      {/* CSS ANIMATIONS - icon floating unchanged */}
       <style jsx>{`
-        /* Draws in once, then keeps flowing continuously left to right */
-        .journey-path-line {
-          stroke-dasharray: 6 10;
-          stroke-dashoffset: 0;
-          animation: flowLine 3s linear infinite;
-        }
-
-        @keyframes flowLine {
-          from { stroke-dashoffset: 0; }
-          to { stroke-dashoffset: -160; }
-        }
-
-        /* Gentle idle floating for each icon bubble, staggered per icon */
         .journey-icon-float {
           animation: iconFloat 3.2s ease-in-out infinite;
         }
