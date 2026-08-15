@@ -28,8 +28,6 @@
     "extends": [
       "react-app",
       "react-app/jest"
-
-      #budgetravel project update
     ]
   },
   "browserslist": {
