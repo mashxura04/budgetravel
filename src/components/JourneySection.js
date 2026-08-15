@@ -8,123 +8,102 @@ function JourneySection() {
     {
       icon: PlaneTakeoff,
       label: t("journeyStop1"),
-      detail: "Touch down and start exploring", // Hardcoded to match your image
+      detail: "Touch down and start exploring",
+      x: 5,
+      y: 50,
       from: "#F0997B",
       to: "#D85A30",
+      tint: "#FAECE7",
+      dark: "#4A1B0C",
     },
     {
       icon: Home,
       label: t("journeyStop2"),
-      detail: t("journeyStop2Detail"),
+      detail: "Real homes, real hospitality", // Hardcoded to match your image
+      x: 27,
+      y: 15,
       from: "#5DCAA5",
       to: "#1D9E75",
+      tint: "#E1F5EE",
+      dark: "#04342C",
     },
     {
       icon: Utensils,
       label: t("journeyStop3"),
       detail: t("journeyStop3Detail"),
+      x: 50,
+      y: 50,
       from: "#F5B94D",
       to: "#E38A00",
+      tint: "#FAEEDA",
+      dark: "#412402",
     },
     {
       icon: ShoppingBag,
       label: t("journeyStop4"),
       detail: t("journeyStop4Detail"),
+      x: 73,
+      y: 15,
       from: "#AFA9EC",
       to: "#7F77DD",
+      tint: "#EEEDFE",
+      dark: "#26215C",
     },
     {
       icon: MessageCircleHeart,
       label: t("journeyStop5"),
       detail: t("journeyStop5Detail"),
+      x: 95,
+      y: 50,
       from: "#ED93B1",
       to: "#D4537E",
+      tint: "#FBEAF0",
+      dark: "#4B1528",
     },
   ];
 
+  const pathD = "M 5 55 Q 27 18 50 55 T 95 55";
+
   return (
-    <section className="bg-[#FFFBF7] py-20 overflow-hidden">
-      <div className="max-w-5xl mx-auto px-6">
-        <div className="text-center mb-16">
-          <p className="text-brand-600 font-bold text-xs tracking-[0.15em] uppercase mb-3">
-            {t("journeyEyebrow")}
-          </p>
-          <h2 className="font-display text-3xl md:text-5xl font-semibold text-[#1a1a1a]">
-            {t("journeyTitle")}
-          </h2>
+    <section className="journey-section">
+      <div className="journey-container">
+        <div className="journey-header-wrapper">
+          <p className="journey-eyebrow">{t("journeyEyebrow")}</p>
+          <h2 className="journey-title">{t("journeyTitle")}</h2>
         </div>
 
-        {/* Desktop: 3D Animated Journey Map */}
-        <div className="hidden sm:block relative">
+        {/* Desktop */}
+        <div className="journey-desktop-wrapper">
           
-          {/* 
-             THE FIX: Pure CSS Wavy Line. 
-             It sits absolutely behind everything. It will NEVER overlap text.
-          */}
-          <div 
-            className="absolute left-0 right-0 z-0 top-[60px]"
-            style={{ 
-              height: '80px',
-              background: `radial-gradient(ellipse at 50% 100%, rgba(255, 122, 26, 0.15) 0%, transparent 70%)`, // A soft 3D glow behind the line
-              borderBottom: '3px solid #FF7A1A', // The thick orange road
-              borderRadius: '50% 50% 50% 50% / 100% 100% 0% 0%', // A massive CSS curve that sweeps upwards
-              boxShadow: '0 10px 20px -5px rgba(255, 122, 26, 0.3)',
-              transform: 'scaleX(0.95)', /* Slightly shrink sides to match your curve */
-              animation: 'drawLineCSS 2s ease-out forwards'
-            }}
-          />
+          {/* The SVG Line - given explicit z-index: 0 so it stays BEHIND everything */}
+          <div className="journey-svg-container">
+            <svg viewBox="0 0 100 80" className="journey-svg" preserveAspectRatio="none">
+              <path d={pathD} fill="none" stroke="#FFB347" strokeWidth="0.5" strokeLinecap="round" className="journey-base-line"/>
+              <path d={pathD} fill="none" stroke="#FF7A1A" strokeWidth="1.2" strokeLinecap="round" className="journey-path-line"/>
+            </svg>
+          </div>
 
-          {/* The 5 Steps - Floating beautifully */}
-          <div className="relative flex justify-between z-10" style={{ transformStyle: "preserve-3d" }}>
+          {/* The 5 Steps - Highly visible z-index: 10 */}
+          <div className="journey-steps-wrapper">
             {STOPS.map((stop, i) => {
               const Icon = stop.icon;
               const floatDelay = i * 0.15; 
               
               return (
-                <div 
-                  key={stop.label} 
-                  className="flex flex-col items-center w-32 text-center group cursor-default relative"
-                  style={{ 
-                    marginTop: i % 2 === 0 ? 60 : 25, /* Even numbers lower, Odd numbers higher */
-                    animation: `floatUpDown 4s ease-in-out ${floatDelay}s infinite`,
-                    transform: "translateZ(30px)"
-                  }}
-                >
-                  {/* 3D Floating Bubble */}
-                  <div 
-                    className="relative w-[70px] h-[70px] rounded-full flex items-center justify-center transition-all duration-500 ease-out shadow-[0_15px_35px_-10px_rgba(0,0,0,0.15)] hover:shadow-[0_20px_45px_-10px_rgba(0,0,0,0.25)] hover:scale-110"
-                    style={{
-                      background: `linear-gradient(145deg, ${stop.from}, ${stop.to})`,
-                      transform: "translateZ(20px)"
-                    }}
-                  >
-                    {/* Inner glow */}
-                    <div className="absolute inset-0 rounded-full bg-white opacity-20 blur-md" style={{ top: '-2px', left: '-2px', width: '110%', height: '110%' }} />
-                    
-                    {/* Icon */}
-                    <Icon
-                      size={28}
-                      color="#ffffff"
-                      strokeWidth={2}
-                      className="relative z-10 drop-shadow-md"
-                    />
+                <div key={stop.label} className={`journey-step journey-step-${i}`} style={{ animationDelay: `${floatDelay}s` }}>
+                  <div className="journey-icon-bubble" style={{ background: `linear-gradient(145deg, ${stop.from}, ${stop.to})` }}>
+                    <div className="journey-inner-glow" />
+                    <Icon size={28} color="#ffffff" strokeWidth={2} className="journey-icon" />
                   </div>
 
-                  {/* Text Label */}
-                  <p className="mt-5 text-sm font-bold text-[#1a1a1a] tracking-wide">
-                    {stop.label}
-                  </p>
+                  <p className="journey-label">{stop.label}</p>
                   
-                  {/* Subtext Details */}
+                  {/* Specific detail texts per your images */}
                   {i === 0 && (
-                    <p className="text-xs text-[#D85A30] font-medium mt-1 font-serif tracking-wide">
-                      Touch down and start exploring
-                    </p>
+                    <p className="journey-detail orange-text">Touch down and start exploring</p>
                   )}
-                  {i === 2 && (
-                    <p className="text-xs text-[#E38A00] font-medium mt-1 font-serif tracking-wide">
-                      {stop.detail}
-                    </p>
+                  {i === 1 && (
+                    <p className="journey-detail green-text">Real homes, real hospitality</p>
                   )}
                 </div>
               );
@@ -132,23 +111,21 @@ function JourneySection() {
           </div>
         </div>
 
-        {/* Mobile: Vertical Timeline */}
-        <div className="sm:hidden relative pl-8">
-          <div className="absolute left-[19px] top-2 bottom-2 w-[2px] bg-neutral-200 rounded-full" />
-          <div className="space-y-7">
+        {/* Mobile - kept simple */}
+        <div className="journey-mobile-wrapper">
+          <div className="journey-mobile-line" />
+          <div className="journey-mobile-steps">
             {STOPS.map((stop, i) => {
               const Icon = stop.icon;
               return (
-                <div key={stop.label} className="relative flex items-start gap-4">
-                  <div
-                    className="relative w-11 h-11 rounded-full border-2 border-white flex items-center justify-center shrink-0 z-10 shadow-md"
-                    style={{ background: `linear-gradient(145deg, ${stop.from}, ${stop.to})` }}
-                  >
+                <div key={stop.label} className="journey-mobile-step">
+                  <div className="journey-mobile-bubble" style={{ background: `linear-gradient(145deg, ${stop.from}, ${stop.to})` }}>
                     <Icon size={18} color="#ffffff" strokeWidth={2} />
                   </div>
-                  <div className="pt-1.5">
-                    <p className="text-sm text-[#1a1a1a] font-bold">{stop.label}</p>
-                    {(i === 0 || i === 2) && <p className="text-xs mt-0.5 font-serif font-medium" style={{ color: stop.to }}>{stop.detail}</p>}
+                  <div className="journey-mobile-text">
+                    <p className="journey-mobile-label">{stop.label}</p>
+                    {i === 0 && <p className="journey-mobile-detail orange-text">Touch down and start exploring</p>}
+                    {i === 1 && <p className="journey-mobile-detail green-text">Real homes, real hospitality</p>}
                   </div>
                 </div>
               );
@@ -157,18 +134,64 @@ function JourneySection() {
         </div>
       </div>
 
-      {/* CSS ANIMATIONS */}
-      <style jsx>{`
-        /* Floating */
+      {/* RAW CSS THAT ALWAYS WORKS - NO TAILWIND DEPENDENCY */}
+      <style>{`
+        .journey-section { background-color: #FFFBF7; padding: 80px 0; overflow: hidden; font-family: sans-serif; }
+        .journey-container { max-width: 1024px; margin: 0 auto; padding: 0 24px; }
+        
+        .journey-header-wrapper { text-align: center; margin-bottom: 60px; }
+        .journey-eyebrow { color: #c75613; font-weight: bold; font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 12px; display: block; }
+        .journey-title { font-family: Georgia, serif; font-size: 40px; font-weight: 600; color: #1a1a1a; margin: 0; }
+
+        /* DESKTOP LAYOUT */
+        .journey-desktop-wrapper { position: relative; display: none; height: 280px; }
+        @media (min-width: 640px) { .journey-desktop-wrapper { display: block; } }
+
+        /* THE SVG LINE - FORCED BEHIND EVERYTHING */
+        .journey-svg-container { position: absolute; inset: 0; width: 100%; height: 150px; top: 40px; z-index: 0; }
+        .journey-svg { width: 100%; height: 100%; overflow: visible; }
+        .journey-path-line { stroke-dasharray: 350; stroke-dashoffset: 350; animation: drawLine 2.5s ease forwards; }
+
+        /* THE STEPS - FORCED ON TOP */
+        .journey-steps-wrapper { position: relative; display: flex; justify-content: space-between; z-index: 10; margin-top: 20px; transform-style: preserve-3d; }
+        
+        .journey-step { display: flex; flex-direction: column; align-items: center; width: 128px; text-align: center; animation: floatUpDown 4s ease-in-out infinite; transform: translateZ(30px); }
+        .journey-step-0 { margin-top: 50px; }
+        .journey-step-1 { margin-top: 15px; }
+        .journey-step-2 { margin-top: 50px; }
+        .journey-step-3 { margin-top: 15px; }
+        .journey-step-4 { margin-top: 50px; }
+
+        .journey-icon-bubble { position: relative; width: 70px; height: 70px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 15px 35px -10px rgba(0,0,0,0.15); transition: transform 0.3s; }
+        .journey-icon-bubble:hover { transform: scale(1.1); }
+        .journey-inner-glow { position: absolute; inset: 0; border-radius: 50%; background: white; opacity: 0.2; filter: blur(4px); top: -2px; left: -2px; width: 110%; height: 110%; }
+        .journey-icon { position: relative; z-index: 10; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.2)); }
+
+        .journey-label { margin-top: 20px; font-size: 14px; font-weight: bold; color: #1a1a1a; letter-spacing: 0.5px; }
+        .journey-detail { margin-top: 4px; font-size: 13px; font-family: Georgia, serif; font-weight: 500; }
+        
+        .orange-text { color: #D85A30; }
+        .green-text { color: #1D9E75; }
+
+        /* MOBILE LAYOUT */
+        .journey-mobile-wrapper { position: relative; padding-left: 32px; display: block; }
+        @media (min-width: 640px) { .journey-mobile-wrapper { display: none; } }
+        
+        .journey-mobile-line { position: absolute; left: 19px; top: 8px; bottom: 8px; width: 2px; background: #e5e5e5; border-radius: 9999px; }
+        .journey-mobile-steps { display: flex; flex-direction: column; gap: 28px; }
+        .journey-mobile-step { position: relative; display: flex; align-items: flex-start; gap: 16px; }
+        .journey-mobile-bubble { position: relative; width: 44px; height: 44px; border-radius: 50%; border: 2px solid white; display: flex; align-items: center; justify-content: center; flex-shrink: 0; z-index: 10; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .journey-mobile-text { padding-top: 6px; }
+        .journey-mobile-label { font-size: 14px; font-weight: bold; color: #1a1a1a; margin: 0; }
+        .journey-mobile-detail { font-size: 12px; font-family: Georgia, serif; font-weight: 500; margin-top: 2px; }
+
+        /* ANIMATIONS */
         @keyframes floatUpDown {
           0%, 100% { transform: translateZ(30px) translateY(0px); }
           50% { transform: translateZ(30px) translateY(-10px); }
         }
-        
-        /* CSS Line drawing effect */
-        @keyframes drawLineCSS {
-          0% { transform: scaleX(0); opacity: 0; }
-          100% { transform: scaleX(0.95); opacity: 1; }
+        @keyframes drawLine {
+          to { stroke-dashoffset: 0; }
         }
       `}</style>
     </section>
