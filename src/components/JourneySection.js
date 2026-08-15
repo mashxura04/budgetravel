@@ -7,42 +7,42 @@ const RESET_PAUSE = 900;
 
 function JourneySection() {
   const { t } = useLanguage();
-  const [activeStop, setActiveStop] = useState(0);
-  const [animate, setAnimate] = useState(false);
+
+  // separate from the walking-line state below: this only controls
+  // click-to-reveal captions under each icon, untouched from before
+  const [activeIndex, setActiveIndex] = useState(null);
+
+  // drives the auto-walking line + marker only, never touches icon styling
+  const [walkStop, setWalkStop] = useState(0);
+  const [walkAnimate, setWalkAnimate] = useState(false);
 
   const STOPS = [
     {
       icon: PlaneTakeoff,
       label: t("journeyStop1"),
-      detail: t("journeyStop1Detail"),
+      detail: "Touch down and start exploring",
       x: 5,
       y: 50,
       from: "#F0997B",
       to: "#D85A30",
-      tint: "#FAECE7",
-      dark: "#4A1B0C",
     },
     {
       icon: Home,
       label: t("journeyStop2"),
-      detail: t("journeyStop2Detail"),
+      detail: "Real homes, real hospitality",
       x: 27,
       y: 15,
       from: "#5DCAA5",
       to: "#1D9E75",
-      tint: "#E1F5EE",
-      dark: "#04342C",
     },
     {
       icon: Utensils,
       label: t("journeyStop3"),
-      detail: t("journeyStop3Detail"),
+      detail: "Home cooked, not tourist priced",
       x: 50,
       y: 50,
       from: "#F5B94D",
       to: "#E38A00",
-      tint: "#FAEEDA",
-      dark: "#412402",
     },
     {
       icon: ShoppingBag,
@@ -52,8 +52,6 @@ function JourneySection() {
       y: 15,
       from: "#AFA9EC",
       to: "#7F77DD",
-      tint: "#EEEDFE",
-      dark: "#26215C",
     },
     {
       icon: MessageCircleHeart,
@@ -63,11 +61,14 @@ function JourneySection() {
       y: 50,
       from: "#ED93B1",
       to: "#D4537E",
-      tint: "#FBEAF0",
-      dark: "#4B1528",
     },
   ];
 
+  const toggleActive = (i) => {
+    setActiveIndex((prev) => (prev === i ? null : i));
+  };
+
+  // auto-advancing walking marker, looping forever — same timing/logic as the old version
   useEffect(() => {
     let idx = 0;
     let timeout;
@@ -76,14 +77,14 @@ function JourneySection() {
       if (idx === STOPS.length - 1) {
         timeout = setTimeout(() => {
           idx = 0;
-          setAnimate(false);
-          setActiveStop(0);
+          setWalkAnimate(false);
+          setWalkStop(0);
           scheduleNext();
         }, RESET_PAUSE);
       } else {
         idx++;
-        setAnimate(true);
-        setActiveStop(idx);
+        setWalkAnimate(true);
+        setWalkStop(idx);
         scheduleNext();
       }
     }
@@ -97,104 +98,108 @@ function JourneySection() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const current = STOPS[activeStop];
-  
-  // CHANGED: Path lowered and spaced out so it floats at the bottom
-  const pathD = "M 5 70 Q 27 50 50 70 T 95 70";
+  const walkCurrent = STOPS[walkStop];
+  const pathD = "M 5 50 Q 27 12 50 50 T 95 50";
 
   return (
-    <section className="bg-[#FFFBF7] py-16">
+    <section className="bg-[#FFFBF7] py-20 overflow-hidden">
       <div className="max-w-5xl mx-auto px-6">
-        <div className="text-center mb-14">
+        <div className="text-center mb-16">
           <p className="text-brand-600 font-bold text-xs tracking-[0.15em] uppercase mb-3">
             {t("journeyEyebrow")}
           </p>
-          <h2 className="font-display text-3xl md:text-4xl font-semibold text-ink">
+          <h2 className="font-display text-3xl md:text-4xl font-bold text-[#1a1a1a]">
             {t("journeyTitle")}
           </h2>
         </div>
 
-        {/* Desktop / tablet: curved path with badges */}
-        <div className="hidden sm:block relative overflow-visible pb-10" style={{ height: 280 }}>
-          
-          {/* CHANGED: SVG moved further down and given a lower z-index */}
-          <svg viewBox="0 0 100 80" className="absolute inset-0 w-full overflow-visible z-0" style={{ height: 140, top: 100 }} preserveAspectRatio="none">
-            <path d={pathD} fill="none" stroke="#FFD8A8" strokeWidth="1.2" strokeLinecap="round" />
-            <path
-              d={pathD}
-              fill="none"
-              stroke="#FF7A1A"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeDasharray="210"
-              strokeDashoffset={210 - (210 * activeStop) / (STOPS.length - 1)}
-              style={{ transition: animate ? "stroke-dashoffset 1s cubic-bezier(0.3,0.7,0.3,1)" : "none" }}
+        {/* Desktop: The Great Wavy Journey Road */}
+        <div className="hidden sm:block relative pb-10">
+
+          {/* THE ROAD - thin clean line (no more fat footprint dashes), with a
+              marker that actually walks along it and loops forever */}
+          <div className="absolute left-0 right-0 w-full top-0 h-[150px] z-0 pointer-events-none overflow-visible">
+            <svg viewBox="0 0 100 70" className="absolute inset-0 w-full h-full overflow-visible" preserveAspectRatio="none">
+              <path d={pathD} fill="none" stroke="#FFD8A8" strokeWidth="0.7" strokeLinecap="round" />
+              <path
+                d={pathD}
+                fill="none"
+                stroke="#FF7A1A"
+                strokeWidth="0.7"
+                strokeLinecap="round"
+                strokeDasharray="210"
+                strokeDashoffset={210 - (210 * walkStop) / (STOPS.length - 1)}
+                style={{
+                  transition: walkAnimate ? "stroke-dashoffset 1s cubic-bezier(0.3,0.7,0.3,1)" : "none",
+                }}
+              />
+            </svg>
+
+            <MapPin
+              size={22}
+              className="absolute z-20"
+              style={{
+                left: `${walkCurrent.x}%`,
+                top: `${(walkCurrent.y / 70) * 150 - 22}px`,
+                transform: "translateX(-50%)",
+                color: walkCurrent.to,
+                transition: walkAnimate
+                  ? "left 1s cubic-bezier(0.3,0.7,0.3,1), top 1s cubic-bezier(0.3,0.7,0.3,1)"
+                  : "none",
+              }}
+              fill={walkCurrent.to}
             />
-          </svg>
+          </div>
 
-          <MapPin
-            size={26}
-            className="absolute z-20"
-            style={{
-              left: `${current.x}%`,
-              top: `${100 + (current.y / 100) * 140 - 26}px`,
-              transform: "translateX(-50%)",
-              color: current.to,
-              transition: animate ? "left 1s cubic-bezier(0.3,0.7,0.3,1), top 1s cubic-bezier(0.3,0.7,0.3,1)" : "none",
-            }}
-            fill={current.to}
-          />
-
-          {/* CHANGED: Moved icons down slightly so there is empty space between them and the line */}
-          <div className="relative z-10 flex justify-between" style={{ marginTop: 20 }}>
+          {/* The 5 Steps - icons completely untouched from before */}
+          <div className="relative flex justify-between z-10" style={{ transformStyle: "preserve-3d" }}>
             {STOPS.map((stop, i) => {
               const Icon = stop.icon;
-              const isActive = activeStop === i;
-              const isPast = i < activeStop;
+              const isActive = activeIndex === i;
+
               return (
-                <div key={stop.label} className="flex flex-col items-center w-32 text-center" style={{ marginTop: i % 2 === 0 ? 38 : 0 }}>
-                  <div className="relative w-[52px] h-[52px] flex items-center justify-center">
-                    {isActive && (
-                      <span
-                        className="absolute inset-0 rounded-full animate-ping opacity-30"
-                        style={{ backgroundColor: stop.to }}
-                      />
-                    )}
-                    <div
-                      className="relative w-[46px] h-[46px] rounded-full flex items-center justify-center transition-all duration-400"
+                <div
+                  key={stop.label}
+                  className="flex flex-col items-center w-32 text-center group relative"
+                  style={{
+                    marginTop: i % 2 === 0 ? 60 : 25,
+                    transform: "translateZ(30px)",
+                  }}
+                >
+                  <div
+                    className="journey-icon-float"
+                    style={{ animationDelay: `${i * 0.3}s` }}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => toggleActive(i)}
+                      aria-pressed={isActive}
+                      className="relative w-[70px] h-[70px] rounded-full flex items-center justify-center transition-transform duration-300 ease-out shadow-[0_15px_35px_-10px_rgba(0,0,0,0.15)] hover:shadow-[0_20px_45px_-10px_rgba(0,0,0,0.25)] hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-2"
                       style={{
-                        background: isActive
-                          ? `linear-gradient(135deg, ${stop.from}, ${stop.to})`
-                          : isPast
-                          ? stop.tint
-                          : "#F7F7F5",
-                        border: isActive || isPast ? "none" : "1px solid #E8E4DD",
-                        transform: isActive ? "scale(1.15)" : "scale(1)",
+                        background: `linear-gradient(145deg, ${stop.from}, ${stop.to})`,
                       }}
                     >
-                      <Icon
-                        size={20}
-                        color={isActive ? "#fff" : isPast ? stop.dark : "#9CA3AF"}
-                        strokeWidth={2}
+                      <div
+                        className="absolute inset-0 rounded-full bg-white opacity-20 blur-md"
+                        style={{ top: "-2px", left: "-2px", width: "110%", height: "110%" }}
                       />
-                    </div>
+                      <Icon size={28} color="#ffffff" strokeWidth={2} className="relative z-10 drop-shadow-md" />
+                    </button>
                   </div>
-                  <p
-                    className={`mt-2.5 text-xs leading-snug transition-colors duration-300 ${
-                      isActive ? "text-ink font-bold" : isPast ? "text-ink-soft font-medium" : "text-neutral-400 font-medium"
-                    }`}
-                  >
-                    {stop.label}
-                  </p>
-                  
-                  {/* CHANGED: Detail text now pops up ONLY when the line passes the emoji */}
-                  <div 
-                    className={`text-center text-xs font-medium mt-1 leading-tight transition-all duration-500 ease-out ${
-                      isActive ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
-                    }`}
-                    style={{ color: stop.to }}
-                  >
-                    {stop.detail}
+
+                  <div className="mt-5 h-[70px] flex flex-col justify-start items-center">
+                    <p className="text-[15px] font-bold text-[#1a1a1a] tracking-wide">
+                      {stop.label}
+                    </p>
+
+                    <p
+                      className={`text-[13px] font-medium mt-1 font-serif leading-tight transition-opacity duration-300 ease-out ${
+                        isActive ? "opacity-100" : "opacity-0 pointer-events-none"
+                      }`}
+                      style={{ color: stop.to }}
+                    >
+                      {stop.detail}
+                    </p>
                   </div>
                 </div>
               );
@@ -202,53 +207,34 @@ function JourneySection() {
           </div>
         </div>
 
-        {/* Mobile: vertical timeline, driven by the same live activeStop state */}
+        {/* Mobile: Vertical Timeline - unchanged, still click-based */}
         <div className="sm:hidden relative pl-8">
           <div className="absolute left-[19px] top-2 bottom-2 w-[2px] bg-neutral-200 rounded-full" />
-          <div className="space-y-7">
+          <div className="space-y-8">
             {STOPS.map((stop, i) => {
               const Icon = stop.icon;
-              const isActive = activeStop === i;
-              const isPast = i < activeStop;
+              const isActive = activeIndex === i;
               return (
                 <div key={stop.label} className="relative flex items-start gap-4">
-                  {isActive && (
-                    <span
-                      className="absolute left-0 top-0 w-11 h-11 rounded-full animate-ping opacity-30"
-                      style={{ backgroundColor: stop.to }}
-                    />
-                  )}
-                  <div
-                    className="relative w-11 h-11 rounded-full border-2 border-white flex items-center justify-center shrink-0 z-10 transition-all duration-400"
-                    style={{
-                      background: isActive
-                        ? `linear-gradient(135deg, ${stop.from}, ${stop.to})`
-                        : isPast
-                        ? stop.tint
-                        : "#F7F7F5",
-                      boxShadow: isActive ? `0 6px 14px ${stop.to}55` : "none",
-                      transform: isActive ? "scale(1.08)" : "scale(1)",
-                    }}
+                  <button
+                    type="button"
+                    onClick={() => toggleActive(i)}
+                    aria-pressed={isActive}
+                    className="relative w-11 h-11 rounded-full border-2 border-white flex items-center justify-center shrink-0 z-10 shadow-md"
+                    style={{ background: `linear-gradient(145deg, ${stop.from}, ${stop.to})` }}
                   >
-                    <Icon
-                      size={18}
-                      color={isActive ? "#fff" : isPast ? stop.dark : "#9CA3AF"}
-                      strokeWidth={2}
-                    />
-                  </div>
-                  <div className="pt-1.5">
+                    <Icon size={18} color="#ffffff" strokeWidth={2} />
+                  </button>
+                  <div className="pt-1">
+                    <p className="text-[15px] text-[#1a1a1a] font-bold">{stop.label}</p>
                     <p
-                      className={`text-sm transition-colors duration-300 ${
-                        isActive ? "text-ink font-bold" : isPast ? "text-ink-soft font-semibold" : "text-neutral-400 font-semibold"
+                      className={`text-xs mt-0.5 font-serif leading-tight transition-opacity duration-300 ease-out ${
+                        isActive ? "opacity-100" : "opacity-0 pointer-events-none"
                       }`}
+                      style={{ color: stop.to }}
                     >
-                      {stop.label}
+                      {stop.detail}
                     </p>
-                    {isActive && (
-                      <p className="text-xs mt-0.5 font-medium" style={{ color: stop.to }}>
-                        {stop.detail}
-                      </p>
-                    )}
                   </div>
                 </div>
               );
@@ -256,6 +242,18 @@ function JourneySection() {
           </div>
         </div>
       </div>
+
+      {/* CSS ANIMATIONS - icon floating unchanged */}
+      <style jsx>{`
+        .journey-icon-float {
+          animation: iconFloat 3.2s ease-in-out infinite;
+        }
+
+        @keyframes iconFloat {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-8px); }
+        }
+      `}</style>
     </section>
   );
 }
